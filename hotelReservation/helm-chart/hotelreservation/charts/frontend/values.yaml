@@ -1,17 +1,18 @@
 name: frontend
 
+serviceType: LoadBalancer
 ports:
   - port: 5000
     targetPort: 5000
 
 container:
-  command: ./frontend
+  command: /go/bin/frontend
   image: deathstarbench/hotel-reservation
   name: hotel-reserv-frontend
   ports:
-  - containerPort: 5000
+    - containerPort: 5000
 
 configMaps:
   - name: service-config.json
-    mountPath: config.json
+    mountPath: /workspace/config.json
     value: service-config

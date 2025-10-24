@@ -1,5 +1,6 @@
 name: jaeger
 
+type: LoadBalancer
 ports:
   - port: 5775
     protocol: UDP

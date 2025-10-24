@@ -1,5 +1,6 @@
 name: nginx-web-server
 
+type: LoadBalancer
 ports:
   - port: 8080
     targetPort: 8080
@@ -31,7 +32,7 @@ initContainer:
   command: "/bin/sh"
   args: [
       "-c",
-      "git clone https://github.com/dimoibiehg/DeathStarBench.git /DeathStarBench &&
+      "git clone https://github.com/nighmared/dsb-custom.git /DeathStarBench &&
       cp -r /DeathStarBench/mediaMicroservices/gen-lua/* /gen-lua/ &&
       cp -r /DeathStarBench/mediaMicroservices/nginx-web-server/lua-scripts/* /lua-scripts/",
     ]

@@ -9,6 +9,9 @@ spec:
   {{- range .Values.ports }}
   - name: "{{ .port }}"
     port: {{ .port }}
+    {{- if eq (int .port) 16686 5000 }}
+    nodePort: {{ .port }}
+    {{- end }}
     {{- if .protocol}}
     protocol: {{ .protocol }}
     {{- end }}
