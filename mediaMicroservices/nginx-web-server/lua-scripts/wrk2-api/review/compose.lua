@@ -12,7 +12,7 @@ local function _UploadUserId(req_id, post, carrier)
   local GenericObjectPool = require "GenericObjectPool"
   local UserServiceClient = require 'media_service_UserService'
   local user_client = GenericObjectPool:connection(
-    UserServiceClient,"user-service" .. k8s_suffix,9090)
+    UserServiceClient, "user-service" .. k8s_suffix, 9090)
   user_client:UploadUserWithUsername(req_id, post.username, carrier)
   GenericObjectPool:returnConnection(user_client)
 end
@@ -21,7 +21,7 @@ local function _UploadText(req_id, post, carrier)
   local GenericObjectPool = require "GenericObjectPool"
   local TextServiceClient = require 'media_service_TextService'
   local text_client = GenericObjectPool:connection(
-    TextServiceClient,"text-service" .. k8s_suffix ,9090)
+    TextServiceClient, "text-service" .. k8s_suffix, 9099) -- 24.2.2026 change from 9090 because that is a reserved port in knative
   text_client:UploadText(req_id, post.text, carrier)
   GenericObjectPool:returnConnection(text_client)
 end
@@ -30,7 +30,7 @@ local function _UploadMovieId(req_id, post, carrier)
   local GenericObjectPool = require "GenericObjectPool"
   local MovieIdServiceClient = require 'media_service_MovieIdService'
   local movie_id_client = GenericObjectPool:connection(
-    MovieIdServiceClient,"movie-id-service" .. k8s_suffix ,9090)
+    MovieIdServiceClient, "movie-id-service" .. k8s_suffix, 9090)
   movie_id_client:UploadMovieId(req_id, post.title, tonumber(post.rating), carrier)
   GenericObjectPool:returnConnection(movie_id_client)
 end
@@ -39,7 +39,7 @@ local function _UploadUniqueId(req_id, carrier)
   local GenericObjectPool = require "GenericObjectPool"
   local UniqueIdServiceClient = require 'media_service_UniqueIdService'
   local unique_id_client = GenericObjectPool:connection(
-    UniqueIdServiceClient,"unique-id-service" .. k8s_suffix ,9090)
+    UniqueIdServiceClient, "unique-id-service" .. k8s_suffix, 9090)
   unique_id_client:UploadUniqueId(req_id, carrier)
   GenericObjectPool:returnConnection(unique_id_client)
 end
@@ -51,7 +51,7 @@ function _M.ComposeReview()
   local req_id = tonumber(string.sub(ngx.var.request_id, 0, 15), 16)
   local tracer = bridge_tracer.new_from_global()
   local parent_span_context = tracer:binary_extract(ngx.var.opentracing_binary_context)
-  local span = tracer:start_span("ComposeReview", {["references"] = {{"child_of", parent_span_context}}})
+  local span = tracer:start_span("ComposeReview", { ["references"] = { { "child_of", parent_span_context } } })
   local carrier = {}
   tracer:text_map_inject(span:context(), carrier)
 
@@ -59,8 +59,8 @@ function _M.ComposeReview()
   local post = ngx.req.get_post_args()
 
   if (_StrIsEmpty(post.title) or _StrIsEmpty(post.text) or
-      _StrIsEmpty(post.username) or _StrIsEmpty(post.password) or
-      _StrIsEmpty(post.rating)) then
+        _StrIsEmpty(post.username) or _StrIsEmpty(post.password) or
+        _StrIsEmpty(post.rating)) then
     ngx.status = ngx.HTTP_BAD_REQUEST
     ngx.say("Incomplete arguments")
     ngx.log(ngx.ERR, "Incomplete arguments")
@@ -83,7 +83,6 @@ function _M.ComposeReview()
   end
   span:finish()
   ngx.exit(status)
-
 end
 
 return _M
