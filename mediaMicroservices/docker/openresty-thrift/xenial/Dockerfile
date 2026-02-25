@@ -7,7 +7,7 @@ LABEL maintainer="Yu Gan <yg397@cornell.edu>"
 
 # Docker Build Arguments
 ARG RESTY_VERSION="1.15.8.1rc1"
-ARG RESTY_LUAROCKS_VERSION="3.5.0"
+ARG RESTY_LUAROCKS_VERSION="3.12.0"
 ARG RESTY_OPENSSL_VERSION="1.1.0j"
 ARG RESTY_PCRE_VERSION="8.42"
 ARG JAEGER_TRACING_VERSION="0.4.2"
@@ -73,31 +73,31 @@ ARG _RESTY_CONFIG_DEPS="--with-openssl=/tmp/openssl-${RESTY_OPENSSL_VERSION} --w
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        build-essential \
-        ca-certificates \
-        curl \
-        git \
-        gettext-base \
-        libgd-dev \
-        libgeoip-dev \
-        libncurses5-dev \
-        libperl-dev \
-        libreadline-dev \
-        libxslt1-dev \
-        make \
-        perl \
-        unzip \
-        zlib1g-dev \
-        cmake \
-        ${RESTY_ADD_PACKAGE_BUILDDEPS} \
-        ${RESTY_ADD_PACKAGE_RUNDEPS} \
+    build-essential \
+    ca-certificates \
+    curl \
+    git \
+    gettext-base \
+    libgd-dev \
+    libgeoip-dev \
+    libncurses5-dev \
+    libperl-dev \
+    libreadline-dev \
+    libxslt1-dev \
+    make \
+    perl \
+    unzip \
+    zlib1g-dev \
+    cmake \
+    ${RESTY_ADD_PACKAGE_BUILDDEPS} \
+    ${RESTY_ADD_PACKAGE_RUNDEPS} \
     && cd /tmp \
     && if [ -n "${RESTY_EVAL_PRE_CONFIGURE}" ]; then eval $(echo ${RESTY_EVAL_PRE_CONFIGURE}); fi \
     && curl -fSL https://www.openssl.org/source/openssl-${RESTY_OPENSSL_VERSION}.tar.gz -o openssl-${RESTY_OPENSSL_VERSION}.tar.gz \
     && tar xzf openssl-${RESTY_OPENSSL_VERSION}.tar.gz \
     && curl -fSL http://ftp.cs.stanford.edu/pub/exim/pcre/pcre-${RESTY_PCRE_VERSION}.tar.gz -o pcre-${RESTY_PCRE_VERSION}.tar.gz \
     && tar xzf pcre-${RESTY_PCRE_VERSION}.tar.gz \
-  ### Build opentracing-cpp
+    ### Build opentracing-cpp
     && cd /tmp \
     && curl -fSL https://github.com/opentracing/opentracing-cpp/archive/v${OPENTRACING_CPP_VERSION}.tar.gz -o opentracing-cpp-${OPENTRACING_CPP_VERSION}.tar.gz\
     && tar -zxf opentracing-cpp-${OPENTRACING_CPP_VERSION}.tar.gz \
@@ -105,16 +105,16 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && mkdir -p cmake-build \
     && cd cmake-build \
     && cmake -DCMAKE_BUILD_TYPE=Release \
-             -DBUILD_MOCKTRACER=OFF \
-             -DBUILD_STATIC_LIBS=OFF \
-             -DBUILD_TESTING=OFF \
-       .. \
+    -DBUILD_MOCKTRACER=OFF \
+    -DBUILD_STATIC_LIBS=OFF \
+    -DBUILD_TESTING=OFF \
+    .. \
     && make -j$(nproc) \
     && make -j$(nproc) install \
     && cd /tmp \
     && rm -rf opentracing-cpp-${OPENTRACING_CPP_VERSION}.tar.gz \
-              opentracing-cpp-${OPENTRACING_CPP_VERSION} \
-  ### Build lua-resty-hmac
+    opentracing-cpp-${OPENTRACING_CPP_VERSION} \
+    ### Build lua-resty-hmac
     && cd /tmp \
     && git clone https://github.com/jkeys089/lua-resty-hmac.git \
     && cd lua-resty-hmac \
@@ -122,8 +122,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && make install \
     && cd /tmp \
     && rm -rf lua-resty-hmac \
-
-  ### Add Jaeger plugin
+    ### Add Jaeger plugin
     && curl -fSL https://github.com/jaegertracing/jaeger-client-cpp/archive/refs/tags/v${JAEGER_TRACING_VERSION}.tar.gz -o v${JAEGER_TRACING_VERSION}.tar.gz \
     && tar xf v${JAEGER_TRACING_VERSION}.tar.gz \
     && cd jaeger-client-cpp-${JAEGER_TRACING_VERSION} \
@@ -147,20 +146,20 @@ RUN cd /usr/local \
     && make -j${RESTY_J} install \
     && cd /tmp \
     && rm -rf \
-        openssl-${RESTY_OPENSSL_VERSION} \
-        openssl-${RESTY_OPENSSL_VERSION}.tar.gz \
-        openresty-${RESTY_VERSION}.tar.gz openresty-${RESTY_VERSION} \
-        pcre-${RESTY_PCRE_VERSION}.tar.gz pcre-${RESTY_PCRE_VERSION}
+    openssl-${RESTY_OPENSSL_VERSION} \
+    openssl-${RESTY_OPENSSL_VERSION}.tar.gz \
+    openresty-${RESTY_VERSION}.tar.gz openresty-${RESTY_VERSION} \
+    pcre-${RESTY_PCRE_VERSION}.tar.gz pcre-${RESTY_PCRE_VERSION}
 
 RUN cd /tmp \
     && curl -fSL  https://luarocks.github.io/luarocks/releases/luarocks-${RESTY_LUAROCKS_VERSION}.tar.gz -o luarocks-${RESTY_LUAROCKS_VERSION}.tar.gz \
     && tar xzf luarocks-${RESTY_LUAROCKS_VERSION}.tar.gz \
     && cd luarocks-${RESTY_LUAROCKS_VERSION} \
     && ./configure \
-        --prefix=/usr/local/openresty/luajit \
-        --with-lua=/usr/local/openresty/luajit \
-        --lua-suffix=jit-2.1.0-beta3 \
-        --with-lua-include=/usr/local/openresty/luajit/include/luajit-2.1 \
+    --prefix=/usr/local/openresty/luajit \
+    --with-lua=/usr/local/openresty/luajit \
+    --lua-suffix=jit-2.1.0-beta3 \
+    --with-lua-include=/usr/local/openresty/luajit/include/luajit-2.1 \
     && make build \
     && make install \
     && cd /tmp \
@@ -189,12 +188,12 @@ COPY lua-json/json.lua /usr/local/openresty/lualib/json/json.lua
 RUN cd /usr/local/openresty/lualib/thrift/src \
     && make \
     && make install \
-  ### Build bridge tracer
+    ### Build bridge tracer
     && cd /tmp/lua-bridge-tracer \
     && mkdir -p cmake-build \
     && cd cmake-build \
     && cmake -DCMAKE_BUILD_TYPE=Release \
-       .. \
+    .. \
     && make -j$(nproc) \
     && make -j$(nproc) install
 #    && cd /tmp
