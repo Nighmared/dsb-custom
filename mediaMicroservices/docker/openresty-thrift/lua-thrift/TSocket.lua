@@ -22,10 +22,11 @@ local TTransportBase = TTransport.TTransportBase
 local Thrift = require 'Thrift'
 local ttype = Thrift.ttype
 local terror = Thrift.terror
+local ngx = require "ngx"
 
 
 -- TSocketBase
-local TSocketBase = TTransportBase:new{
+local TSocketBase = TTransportBase:new {
   __type = 'TSocketBase',
   timeout = 1000,
   host = 'localhost',
@@ -51,7 +52,7 @@ function TSocketBase:getSocketInfo()
   if self.handle then
     return self.handle:getsockinfo()
   end
-  terror(TTransportException:new{errorCode = TTransportException.NOT_OPEN})
+  terror(TTransportException:new { errorCode = TTransportException.NOT_OPEN })
 end
 
 function TSocketBase:setTimeout(timeout)
@@ -64,7 +65,7 @@ function TSocketBase:setTimeout(timeout)
 end
 
 -- TSocket
-local TSocket = TSocketBase:new{
+local TSocket = TSocketBase:new {
   __type = 'TSocket',
   host = 'localhost',
   port = 9090
@@ -85,17 +86,17 @@ function TSocket:open()
   end
   local ok, err = self.handle:connect(self.host, self.port)
   if not ok then
-    terror(TTransportException:new{
+    terror(TTransportException:new {
       message = 'Could not connect to ' .. self.host .. ':' .. self.port
-        .. ' (' .. err .. ')'
+          .. ' (' .. err .. ')'
     })
   end
-end    
+end
 
 function TSocket:read(len)
   local buf = self.handle:receive(len)
   if not buf or string.len(buf) ~= len then
-    terror(TTransportException:new{errorCode = TTransportException.UNKNOWN})
+    terror(TTransportException:new { errorCode = TTransportException.UNKNOWN })
   end
   return buf
 end
@@ -108,7 +109,7 @@ function TSocket:flush()
 end
 
 -- TServerSocket
-local TServerSocket = TSocketBase:new{
+local TServerSocket = TSocketBase:new {
   __type = 'TServerSocket',
   host = 'localhost',
   port = 9090
@@ -129,15 +130,12 @@ function TServerSocket:listen()
   self.handle:listen()
 end
 
-
 function TServerSocket:accept()
   local client, err = self.handle:accept()
   if err then
     terror(err)
   end
-  return TSocket:new({handle = client})
+  return TSocket:new({ handle = client })
 end
 
 return TSocket
-
-

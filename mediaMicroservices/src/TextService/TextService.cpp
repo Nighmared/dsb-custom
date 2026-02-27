@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
         std::make_shared<TBinaryProtocolFactory>());
 
     std::cout
-        << "Starting the text-service [http] server..." << std::endl;
+        << "Starting the text-service [http] server on port " << port << std::endl;
     server.serve();
   }
   else
