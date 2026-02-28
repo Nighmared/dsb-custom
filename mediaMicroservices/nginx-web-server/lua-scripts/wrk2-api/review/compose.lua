@@ -21,7 +21,7 @@ local function _UploadText(req_id, post, carrier)
   local GenericObjectPool = require "GenericObjectPool"
   local TextServiceClient = require 'media_service_TextService'
   local text_client = GenericObjectPool:connection(
-    TextServiceClient, "text-service" .. k8s_suffix, 9099) -- 24.2.2026 change from 9090 because knative wants :80
+    TextServiceClient, "text-service" .. k8s_suffix, 80) -- 24.2.2026 change from 9090 because knative wants :80
   -- we just go with 9099 for all the right reasons, trust me
   text_client:UploadText(req_id, post.text, carrier)
   GenericObjectPool:returnConnection(text_client)
