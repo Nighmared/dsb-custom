@@ -23,7 +23,7 @@ local libluabitwise = require('libluabitwise')
 local Thrift = require 'Thrift'
 local TType = Thrift.TType
 local __TObject = Thrift.__TObject
--- local ttype = Thrift.ttype
+local ttype = Thrift.ttype
 local terror = Thrift.terror
 local TProtocolException = TProtocol.TProtocolException
 local TProtocolBase = TProtocol.TProtocolBase
@@ -31,8 +31,8 @@ local TProtocolFactory = TProtocol.TProtocolFactory
 
 
 local TBinaryProtocol = __TObject.new(TProtocolBase, {
-  __type       = 'TBinaryProtocol',
-  VERSION_MASK = -65536,      -- 0xffff0000
+  __type = 'TBinaryProtocol',
+  VERSION_MASK = -65536, -- 0xffff0000
   VERSION_1    = -2147418112, -- 0x80010000
   TYPE_MASK    = 0x000000ff,
   strictRead   = false,
@@ -137,14 +137,11 @@ function TBinaryProtocol:writeString(str)
 end
 
 function TBinaryProtocol:readMessageBegin()
-  print("XXXXXXXXXXXXXXXXXXXXXXXX")
-  print("transport open: ", self.trans:isOpen())
   local sz, ttype, name, seqid = self:readI32()
-  print("got here!!!!!!!")
   if sz < 0 then
     local version = libluabitwise.band(sz, TBinaryProtocol.VERSION_MASK)
     if version ~= TBinaryProtocol.VERSION_1 then
-      terror(TProtocolException:new {
+      terror(TProtocolException:new{
         message = 'Bad version in readMessageBegin: ' .. sz
       })
     end
@@ -153,7 +150,7 @@ function TBinaryProtocol:readMessageBegin()
     seqid = self:readI32()
   else
     if self.strictRead then
-      terror(TProtocolException:new { message = 'No protocol version header' })
+      terror(TProtocolException:new{message = 'No protocol version header'})
     end
     name = self.trans:readAll(sz)
     ttype = self:readByte()
@@ -256,7 +253,7 @@ function TBinaryProtocol:readString()
   return str
 end
 
-local TBinaryProtocolFactory = TProtocolFactory:new {
+local TBinaryProtocolFactory = TProtocolFactory:new{
   __type = 'TBinaryProtocolFactory',
   strictRead = false
 }
@@ -264,11 +261,11 @@ local TBinaryProtocolFactory = TProtocolFactory:new {
 function TBinaryProtocolFactory:getProtocol(trans)
   -- TODO Enforce that this must be a transport class (ie not a bool)
   if not trans then
-    terror(TProtocolException:new {
+    terror(TProtocolException:new{
       message = 'Must supply a transport to ' .. ttype(self)
     })
   end
-  return TBinaryProtocol:new {
+  return TBinaryProtocol:new{
     trans = trans,
     strictRead = self.strictRead,
     strictWrite = true

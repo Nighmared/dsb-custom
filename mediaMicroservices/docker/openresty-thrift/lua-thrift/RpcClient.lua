@@ -7,17 +7,16 @@ local TFramedTransport = require "TFramedTransport"
 local TBinaryProtocol = require "TBinaryProtocol"
 local THttpTransport = require "THttpTransport"
 local Object = require "Object"
-local ngx = ngx
 
 
 local RpcClient = Object:new({
 	__type = 'RpcClient',
-	timeout = 1001,
-	readTimeout = 500
+	timeout = 3000,
+	-- readTimeout = 500
 })
 
 
-function IsIpServiceName(ip, serviceName)
+local function IsIpServiceName(ip, serviceName)
 	-- verified works aaaaa
 	local k8s_suffix = os.getenv("fqdn_suffix")
 	return ip == (serviceName .. k8s_suffix)
@@ -28,7 +27,7 @@ function RpcClient:init(ip, port)
 	local socket = TSocket:new {
 		host = ip,
 		port = port,
-		readTimeout = self.readTimeout
+		-- readTimeout = self.readTimeout
 	}
 	socket:setTimeout(self.timeout)
 
