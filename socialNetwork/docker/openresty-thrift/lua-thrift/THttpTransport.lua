@@ -26,7 +26,7 @@ local TTransportFactoryBase = TTransport.TTransportFactoryBase
 local ttype = Thrift.ttype
 local terror = Thrift.terror
 
-local THttpTransport = TTransportBase:new{
+local THttpTransport = TTransportBase:new {
   __type = 'THttpTransport',
   path = '/',
   wBuf = '',
@@ -47,6 +47,15 @@ function THttpTransport:new(obj)
   end
 
   return TTransportBase.new(self, obj)
+end
+
+local function THttpHeaders()
+  local data = {}
+  return setmetatable({}, {
+    __index = function(_, key) return data[string.lower(key)] end,
+    __newindex = function(_, key, value) data[string.lower(key)] = value end,
+    __pairs = function() return pairs(data) end
+  })
 end
 
 function THttpTransport:isOpen()
@@ -76,7 +85,7 @@ function THttpTransport:read(len)
   end
 
   local val = string.sub(self.rBuf, 0, len)
-  self.rBuf = string.sub(self.rBuf, len+1)
+  self.rBuf = string.sub(self.rBuf, len + 1)
   return val
 end
 
@@ -109,17 +118,17 @@ function THttpTransport:_readMsg()
 end
 
 function THttpTransport:getLine()
-  local a,b = string.find(self.rBuf, self.CRLF)
+  local a, b = string.find(self.rBuf, self.CRLF)
   local line = ""
   if a and b then
-    line = string.sub(self.rBuf, 0, a-1)
-    self.rBuf = string.sub(self.rBuf, b+1)
+    line = string.sub(self.rBuf, 0, a - 1)
+    self.rBuf = string.sub(self.rBuf, b + 1)
   end
   return line
 end
 
 function THttpTransport:_parseHeaders()
-  local headers = {}
+  local headers = THttpHeaders()
 
   repeat
     local line = self:getLine()
@@ -148,21 +157,21 @@ end
 
 function THttpTransport:writeHttpHeader(content_len)
   if self.isServer then
-    local header =  "HTTP/1.1 200 OK" .. self.CRLF
-      .. "Server: Thrift/" .. self.VERSION .. self.CRLF
-      .. "Access-Control-Allow-Origin: *" .. self.CRLF
-      .. "Content-Type: application/x-thrift" .. self.CRLF
-      .. "Content-Length: " .. content_len .. self.CRLF
-      .. "Connection: Keep-Alive" .. self.CRLF .. self.CRLF
+    local header = "HTTP/1.1 200 OK" .. self.CRLF
+        .. "Server: Thrift/" .. self.VERSION .. self.CRLF
+        .. "Access-Control-Allow-Origin: *" .. self.CRLF
+        .. "Content-Type: application/x-thrift" .. self.CRLF
+        .. "Content-Length: " .. content_len .. self.CRLF
+        .. "Connection: Keep-Alive" .. self.CRLF .. self.CRLF
     self.trans:write(header)
   else
     local header = "POST " .. self.path .. " HTTP/1.1" .. self.CRLF
-      .. "Host: " .. self.trans.host .. self.CRLF
-      .. "Content-Type: application/x-thrift" .. self.CRLF
-      .. "Content-Length: " .. content_len .. self.CRLF
-      .. "Accept: application/x-thrift " .. self.CRLF
-      .. "User-Agent: Thrift/" .. self.VERSION .. " (Lua/THttpClient)"
-      .. self.CRLF .. self.CRLF
+        .. "Host: " .. self.trans.host .. self.CRLF
+        .. "Content-Type: application/x-thrift" .. self.CRLF
+        .. "Content-Length: " .. content_len .. self.CRLF
+        .. "Accept: application/x-thrift " .. self.CRLF
+        .. "User-Agent: Thrift/" .. self.VERSION .. " (Lua/THttpClient)"
+        .. self.CRLF .. self.CRLF
     self.trans:write(header)
   end
 end
@@ -176,14 +185,16 @@ function THttpTransport:flush()
   self.trans:flush()
 end
 
-local THttpTransportFactory = TTransportFactoryBase:new{
+local THttpTransportFactory = TTransportFactoryBase:new {
   __type = 'THttpTransportFactory'
 }
 function THttpTransportFactory:getTransport(trans)
   if not trans then
-    terror(TProtocolException:new{
+    terror(TProtocolException:new {
       message = 'Must supply a transport to ' .. ttype(self)
     })
   end
-  return THttpTransport:new{trans = trans}
+  return THttpTransport:new { trans = trans }
 end
+
+return THttpTransport
