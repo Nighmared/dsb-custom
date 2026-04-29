@@ -31,12 +31,13 @@ type Server struct {
 	rateClient rate.RateClient
 	uuid       string
 
-	Tracer     opentracing.Tracer
-	Port       int
-	IpAddr     string
-	ConsulAddr string
-	KnativeDns string
-	Registry   *registry.Client
+	Tracer       opentracing.Tracer
+	Port         int
+	IpAddr       string
+	ConsulAddr   string
+	KnativeDns   string
+	Registry     *registry.Client
+	IsServerless bool
 }
 
 // Run starts the server
@@ -112,6 +113,20 @@ func (s *Server) initRateClient(name string) error {
 }
 
 func (s *Server) getGprcConn(name string) (*grpc.ClientConn, error) {
+	if name == "srv-geo" {
+		if s.IsServerless {
+			return dialer.Dial(
+				"geo.thesis.svc.cluster.local:80",
+				dialer.WithTracer((s.Tracer)),
+			)
+		} else {
+			return dialer.Dial(
+				"geo-thesis-dsb-hr-hotelres:8083",
+				dialer.WithTracer(s.Tracer),
+			)
+		}
+	}
+
 	if s.KnativeDns != "" {
 		return dialer.Dial(
 			fmt.Sprintf("consul://%s/%s.%s", s.ConsulAddr, name, s.KnativeDns),

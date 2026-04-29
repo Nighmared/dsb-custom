@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"io/ioutil"
+	"io"
 	"os"
 	"time"
 
@@ -29,7 +29,7 @@ func main() {
 
 	defer jsonFile.Close()
 
-	byteValue, _ := ioutil.ReadAll(jsonFile)
+	byteValue, _ := io.ReadAll(jsonFile)
 
 	var result map[string]string
 	json.Unmarshal([]byte(byteValue), &result)
@@ -37,6 +37,10 @@ func main() {
 	servPort, _ := strconv.Atoi(result["SearchPort"])
 	servIP := result["SearchIP"]
 	knativeDNS := result["KnativeDomainName"]
+	is_serverless, err := strconv.ParseBool(result["IsServerless"])
+	if err != nil {
+		is_serverless = false
+	}
 
 	var (
 		jaegerAddr = flag.String("jaegerAddr", result["jaegerAddress"], "Jaeger address")
@@ -59,12 +63,13 @@ func main() {
 	log.Info().Msg("Consul agent initialized")
 
 	srv := &search.Server{
-		Tracer:     tracer,
-		Port:       servPort,
-		IpAddr:     servIP,
-		ConsulAddr: *consulAddr,
-		KnativeDns: knativeDNS,
-		Registry:   registry,
+		Tracer:       tracer,
+		Port:         servPort,
+		IpAddr:       servIP,
+		ConsulAddr:   *consulAddr,
+		KnativeDns:   knativeDNS,
+		Registry:     registry,
+		IsServerless: is_serverless,
 	}
 
 	log.Info().Msg("Starting server...")
