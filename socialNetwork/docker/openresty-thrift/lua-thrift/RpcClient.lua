@@ -23,7 +23,7 @@ end
 
 --初始化RPC连接
 function RpcClient:init(ip, port, timeout, ssl)
-	local serverless = os.getenv("serverless")
+	local serverless = os.getenv("serverless") == "true"
 	-- below two "lists" of service names could be different in the future
 	-- could prepare multiple to be serverless and switch to http, but not
 	-- neccessarily deploying all at once on knative
