@@ -18,9 +18,9 @@ function _M.Login()
   local req_id = tonumber(string.sub(ngx.var.request_id, 0, 15), 16)
   local tracer = bridge_tracer.new_from_global()
   local parent_span_context = tracer:binary_extract(
-      ngx.var.opentracing_binary_context)
+    ngx.var.opentracing_binary_context)
   local span = tracer:start_span("Login",
-      {["references"] = {{"child_of", parent_span_context}}})
+    { ["references"] = { { "child_of", parent_span_context } } })
   local carrier = {}
   tracer:text_map_inject(span:context(), carrier)
 
@@ -37,10 +37,10 @@ function _M.Login()
     return ngx.redirect("/login.html")
   end
 
-  local client = GenericObjectPool:connection(UserServiceClient, "user-service" .. k8s_suffix, 9090)
+  local client = GenericObjectPool:connection(UserServiceClient, "user-service" .. k8s_suffix, 9099)
 
   local status, ret = pcall(client.Login, client, req_id,
-      args.username, args.password, carrier)
+    args.username, args.password, carrier)
   GenericObjectPool:returnConnection(client)
 
   if not status then

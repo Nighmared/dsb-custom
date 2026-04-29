@@ -18,9 +18,9 @@ function _M.RegisterUser()
   local req_id = tonumber(string.sub(ngx.var.request_id, 0, 15), 16)
   local tracer = bridge_tracer.new_from_global()
   local parent_span_context = tracer:binary_extract(
-      ngx.var.opentracing_binary_context)
+    ngx.var.opentracing_binary_context)
   local span = tracer:start_span("register_client",
-      {["references"] = {{"child_of", parent_span_context}}})
+    { ["references"] = { { "child_of", parent_span_context } } })
   local carrier = {}
   tracer:text_map_inject(span:context(), carrier)
 
@@ -28,18 +28,18 @@ function _M.RegisterUser()
   local post = ngx.req.get_post_args()
 
   if (_StrIsEmpty(post.first_name) or _StrIsEmpty(post.last_name) or
-      _StrIsEmpty(post.username) or _StrIsEmpty(post.password) or
-      _StrIsEmpty(post.user_id)) then
+        _StrIsEmpty(post.username) or _StrIsEmpty(post.password) or
+        _StrIsEmpty(post.user_id)) then
     ngx.status = ngx.HTTP_BAD_REQUEST
     ngx.say("Incomplete arguments")
     ngx.log(ngx.ERR, "Incomplete arguments")
     ngx.exit(ngx.HTTP_BAD_REQUEST)
   end
 
-  local client = GenericObjectPool:connection(UserServiceClient, "user-service" .. k8s_suffix, 9090)
+  local client = GenericObjectPool:connection(UserServiceClient, "user-service" .. k8s_suffix, 9099)
 
   local status, err = pcall(client.RegisterUserWithId, client, req_id, post.first_name,
-      post.last_name, post.username, post.password, tonumber(post.user_id), carrier)
+    post.last_name, post.username, post.password, tonumber(post.user_id), carrier)
 
   if not status then
     ngx.status = ngx.HTTP_INTERNAL_SERVER_ERROR
